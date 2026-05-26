@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentAnythings Nepal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --red: #C0392B;
+      --blue: #1A3A6B;
+      --gold: #D4A017;
+      --cream: #FAF6F0;
+      --dark: #111111;
+      --gray: #6B6B6B;
+      --light: #F0EBE3;
+      --white: #FFFFFF;
+      --green: #1a7a4a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--cream); color: var(--dark); }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(17,17,17,0.95); backdrop-filter: blur(10px);
+      padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-family: 'Fraunces', serif; font-size: 1.5rem; color: var(--gold); font-weight: 900; }
+    .nav-logo span { color: var(--white); }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a { color: #ccc; text-decoration: none; font-size: 0.85rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--gold); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0a00 40%, #0a1a2a 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 2rem 4rem; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .flag-stripe { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; justify-content: center; }
+    .stripe { width: 40px; height: 4px; border-radius: 2px; }
+    .s1 { background: var(--red); }
+    .s2 { background: var(--white); }
+    .s3 { background: var(--blue); }
+    .hero h1 { font-family: 'Fraunces', serif; font-size: clamp(3rem, 8vw, 6rem); font-weight: 900; color: var(--white); line-height: 1; margin-bottom: 0.5rem; }
+    .hero h1 span { color: var(--gold); font-style: italic; }
+    .hero-sub { font-size: 1.1rem; color: #aaa; margin: 1rem 0 2rem; max-width: 500px; font-weight: 300; }
+    .nepal-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #ddd; font-size: 0.85rem; padding: 0.5rem 1.2rem; border-radius: 50px; margin-bottom: 2rem; }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn-primary { background: var(--gold); color: var(--dark); font-weight: 600; padding: 0.85rem 2rem; border-radius: 50px; text-decoration: none; font-size: 0.95rem; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 20px rgba(212,160,23,0.3); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(212,160,23,0.4); }
+    .btn-secondary { background: transparent; color: var(--white); font-weight: 500; padding: 0.85rem 2rem; border-radius: 50px; text-decoration: none; font-size: 0.95rem; border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+
+    /* STATS */
+    .stats { background: var(--dark); padding: 2rem; display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 900; color: var(--gold); }
+    .stat-label { font-size: 0.8rem; color: #888; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 1px; }
+
+    /* WEATHER */
+    .weather-section { background: var(--blue); padding: 3rem 2rem; }
+    .weather-section h2 { font-family: 'Fraunces', serif; font-size: 2rem; color: var(--white); text-align: center; margin-bottom: 2rem; }
+    .weather-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; max-width: 900px; margin: 0 auto; }
+    .weather-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; padding: 1.5rem; text-align: center; color: var(--white); }
+    .weather-city { font-size: 0.85rem; font-weight: 600; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+    .weather-temp { font-family: 'Fraunces', serif; font-size: 2.5rem; font-weight: 700; margin: 0.5rem 0; }
+    .weather-desc { font-size: 0.8rem; opacity: 0.7; }
+    .weather-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+
+    /* SECTIONS */
+    .section { padding: 5rem 2rem; }
+    .section-alt { background: var(--light); }
+    .section-dark { background: var(--dark); }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 3rem; }
+    .section-tag { display: inline-block; background: var(--gold); color: var(--dark); font-size: 0.75rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+    .section-tag.blue { background: var(--blue); color: var(--white); }
+    .section-tag.red { background: var(--red); color: var(--white); }
+    .section-tag.green { background: var(--green); color: var(--white); }
+    .section-title { font-family: 'Fraunces', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; line-height: 1.2; }
+    .section-title.white { color: var(--white); }
+    .section-desc { color: var(--gray); margin-top: 0.75rem; font-size: 1rem; }
+    .section-desc.white { color: #aaa; }
+
+    /* CARDS */
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .card { background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: 0 2px 20px rgba(0,0,0,0.08); transition: transform 0.2s, box-shadow 0.2s; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 40px rgba(0,0,0,0.15); }
+    .card-dark { background: #1a1a1a; }
+    .card-img { width: 100%; height: 180px; object-fit: cover; background: linear-gradient(135deg, #ddd, #eee); display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+    .card-body { padding: 1.25rem; }
+    .card-name { font-weight: 700; font-size: 1.05rem; color: var(--dark); }
+    .card-name.white { color: var(--white); }
+    .card-meta { font-size: 0.82rem; color: var(--gray); margin-top: 0.3rem; }
+    .card-meta.light { color: #888; }
+    .card-price { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); margin-top: 0.75rem; }
+    .card-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.75rem; }
+    .tag { background: var(--light); color: var(--gray); font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+    .tag-dark { background: #2a2a2a; color: #aaa; }
+    .verified { display: inline-flex; align-items: center; gap: 4px; background: #e8f5e9; color: #2e7d32; font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; margin-top: 0.5rem; }
+    .card-btn { display: block; text-align: center; background: #25D366; color: white; padding: 0.65rem; border-radius: 10px; text-decoration: none; font-size: 0.85rem; font-weight: 600; margin-top: 1rem; transition: opacity 0.2s; }
+    .card-btn:hover { opacity: 0.9; }
+    .card-btn.blue { background: var(--blue); }
+    .card-btn.gold { background: var(--gold); color: var(--dark); }
+
+    /* FORM */
+    .form-section { background: var(--dark); padding: 5rem 2rem; }
+    .forms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1100px; margin: 0 auto; }
+    .form-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 20px; padding: 2rem; }
+    .form-card h3 { font-family: 'Fraunces', serif; font-size: 1.4rem; color: var(--white); margin-bottom: 0.5rem; }
+    .form-card p { font-size: 0.85rem; color: #888; margin-bottom: 1.5rem; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: #ccc; margin-bottom: 0.4rem; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; background: #111; border: 1px solid #333; color: var(--white);
+      padding: 0.75rem 1rem; border-radius: 10px; font-size: 0.9rem; font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: border-color 0.2s; outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--gold); }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group select option { background: #1a1a1a; }
+    .form-group input[type="file"] { padding: 0.5rem; cursor: pointer; color: #aaa; }
+    .form-group input[type="file"]::-webkit-file-upload-button { background: #333; color: #fff; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; margin-right: 0.5rem; }
+    .submit-btn {
+      width: 100%; background: var(--gold); color: var(--dark); font-weight: 700;
+      padding: 0.85rem; border-radius: 10px; border: none; cursor: pointer;
+      font-size: 0.95rem; font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: opacity 0.2s; margin-top: 0.5rem;
+    }
+    .submit-btn:hover { opacity: 0.9; }
+    .success-msg { display: none; background: #1a3a1a; border: 1px solid #2a5a2a; color: #4caf50; padding: 0.75rem; border-radius: 10px; text-align: center; font-size: 0.85rem; margin-top: 0.75rem; }
+
+    /* EVENTS */
+    .event-card { background: var(--white); border-radius: 20px; overflow: hidden; box-shadow: 0 2px 20px rgba(0,0,0,0.08); display: flex; gap: 0; transition: transform 0.2s; }
+    .event-card:hover { transform: translateY(-3px); }
+    .event-date-box { background: var(--red); color: var(--white); padding: 1.5rem 1.2rem; text-align: center; min-width: 80px; display: flex; flex-direction: column; justify-content: center; }
+    .event-day { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 900; line-height: 1; }
+    .event-month { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
+    .event-info { padding: 1.25rem; flex: 1; }
+    .event-title { font-weight: 700; font-size: 1rem; color: var(--dark); }
+    .event-location { font-size: 0.82rem; color: var(--gray); margin-top: 0.3rem; }
+    .event-category { display: inline-block; background: var(--light); color: var(--gray); font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; margin-top: 0.5rem; font-weight: 500; }
+
+    /* FOOTER */
+    footer { background: #0a0a0a; padding: 3rem 2rem; text-align: center; }
+    .footer-logo { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 900; color: var(--gold); margin-bottom: 0.5rem; }
+    .footer-logo span { color: var(--white); }
+    .footer-tagline { color: #555; font-size: 0.85rem; margin-bottom: 2rem; }
+    .footer-links { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+    .footer-links a { color: #555; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--gold); }
+    .footer-copy { color: #333; font-size: 0.78rem; }
+
+    /* LOADING */
+    .loading { text-align: center; color: #888; padding: 3rem; font-size: 0.9rem; }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .stats { gap: 2rem; }
+      .event-card { flex-direction: column; }
+      .event-date-box { flex-direction: row; gap: 0.5rem; align-items: center; padding: 0.75rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Rent<span>Anythings</span></div>
+  <ul class="nav-links">
+    <li><a href="#guides">Guides</a></li>
+    <li><a href="#companions">Companions</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#workers">Workers</a></li>
+    <li><a href="#rentals">Rentals</a></li>
+    <li><a href="#post">Post</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="flag-stripe">
+    <div class="stripe s1"></div>
+    <div class="stripe s2"></div>
+    <div class="stripe s3"></div>
+  </div>
+  <div class="nepal-badge">🇳🇵 Nepal's #1 Rental & Hire Platform</div>
+  <h1>Rent<span>Anythings</span></h1>
+  <p class="hero-sub">Find guides, companions, workers, rentals and events — all in one place across Nepal</p>
+  <div class="hero-btns">
+    <a href="#guides" class="btn-primary">Explore Now</a>
+    <a href="#post" class="btn-secondary">Post Your Profile</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">6+</div><div class="stat-label">Categories</div></div>
+  <div class="stat"><div class="stat-num">🇳🇵</div><div class="stat-label">Nepal Wide</div></div>
+  <div class="stat"><div class="stat-num">Free</div><div class="stat-label">To Post</div></div>
+  <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Available</div></div>
+</div>
+
+<!-- WEATHER -->
+<div class="weather-section">
+  <h2>🌤️ Nepal Live Weather</h2>
+  <div class="weather-grid" id="weatherGrid">
+    <div class="loading">Loading weather...</div>
+  </div>
+</div>
+
+<!-- GUIDES -->
+<div class="section" id="guides">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag blue">🧭 Local Guides</div>
+      <h2 class="section-title">Hire a Certified Nepal Guide</h2>
+      <p class="section-desc">Licensed, verified guides for trekking, tours and cultural experiences</p>
+    </div>
+    <div class="cards-grid" id="guidesGrid">
+      <div class="loading">Loading guides...</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPANIONS -->
+<div class="section section-alt" id="companions">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">👥 Companions</div>
+      <h2 class="section-title">Find a Companion</h2>
+      <p class="section-desc">Professional, platonic companions for events, outings and social activities</p>
+    </div>
+    <div class="cards-grid" id="companionsGrid">
+      <div class="loading">Loading companions...</div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div class="section" id="events">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag red">🎉 Events</div>
+      <h2 class="section-title">Nepal Events & Festivals</h2>
+      <p class="section-desc">Discover upcoming events, festivals and activities across Nepal</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:1rem;" id="eventsGrid">
+      <div class="loading">Loading events...</div>
+    </div>
+  </div>
+</div>
+
+<!-- WORKERS -->
+<div class="section section-alt" id="workers">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag green">💼 Workers</div>
+      <h2 class="section-title">Hire Local Workers</h2>
+      <p class="section-desc">Connect with skilled local workers looking for opportunities</p>
+    </div>
+    <div class="cards-grid" id="workersGrid">
+      <div class="loading">Loading workers...</div>
+    </div>
+  </div>
+</div>
+
+<!-- RENTALS -->
+<div class="section" id="rentals">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag blue">📦 Rentals</div>
+      <h2 class="section-title">Rent Anything in Nepal</h2>
+      <p class="section-desc">Bikes, gear, cameras, vehicles and more — rent from locals</p>
+    </div>
+    <div class="cards-grid" id="rentalsGrid">
+      <div class="loading">Loading rentals...</div>
+    </div>
+  </div>
+</div>
+
+<!-- POST FORMS -->
+<div class="form-section" id="post">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">✍️ Post Your Profile</div>
+      <h2 class="section-title white">List Yourself or Your Product</h2>
+      <p class="section-desc white">It's 100% free to post. Reach thousands of tourists and locals across Nepal!</p>
+    </div>
+    <div class="forms-grid">
+
+      <!-- Guide Form -->
+      <div class="form-card">
+        <h3>🧭 Register as Guide</h3>
+        <p>Post your guide profile and get hired by tourists</p>
+        <div class="form-group"><label>Full Name</label><input type="text" id="g-name" placeholder="Your name"></div>
+        <div class="form-group"><label>City</label>
+          <select id="g-city">
+            <option value="">Select city</option>
+            <option>Kathmandu</option><option>Pokhara</option><option>Chitwan</option>
+            <option>Lumbini</option><option>Namche Bazaar</option><option>Butwal</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Languages Spoken</label><input type="text" id="g-lang" placeholder="e.g. Nepali, English, Hindi"></div>
+        <div class="form-group"><label>Experience (years)</label><input type="number" id="g-exp" placeholder="e.g. 5"></div>
+        <div class="form-group"><label>Price per Day (रू)</label><input type="number" id="g-price" placeholder="e.g. 2000"></div>
+        <div class="form-group"><label>License Number</label><input type="text" id="g-license" placeholder="Your guide license number"></div>
+        <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="g-phone" placeholder="+977 98XXXXXXXX"></div>
+        <div class="form-group"><label>Your Photo</label><input type="file" id="g-photo" accept="image/*"></div>
+        <div class="form-group"><label>License Photo</label><input type="file" id="g-license-photo" accept="image/*"></div>
+        <div class="form-group"><label>About You</label><textarea id="g-bio" placeholder="Describe your experience and specialties..."></textarea></div>
+        <button class="submit-btn" onclick="submitGuide()">Post Guide Profile</button>
+        <div class="success-msg" id="g-success">✅ Profile submitted! We'll review and publish it soon.</div>
+      </div>
+
+      <!-- Companion Form -->
+      <div class="form-card">
+        <h3>👥 Register as Companion</h3>
+        <p>Post your companion profile for platonic social activities</p>
+        <div class="form-group"><label>Full Name</label><input type="text" id="c-name" placeholder="Your name"></div>
+        <div class="form-group"><label>Age</label><input type="number" id="c-age" placeholder="Your age"></div>
+        <div class="form-group"><label>City</label>
+          <select id="c-city">
+            <option value="">Select city</option>
+            <option>Kathmandu</option><option>Pokhara</option><option>Chitwan</option>
+            <option>Lumbini</option><option>Butwal</option><option>Biratnagar</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Services Offered</label><input type="text" id="c-services" placeholder="e.g. Events, Movies, Shopping, Travel"></div>
+        <div class="form-group"><label>Languages</label><input type="text" id="c-lang" placeholder="e.g. Nepali, English"></div>
+        <div class="form-group"><label>Price per Hour (रू)</label><input type="number" id="c-price" placeholder="e.g. 500"></div>
+        <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="c-phone" placeholder="+977 98XXXXXXXX"></div>
+        <div class="form-group"><label>Your Photo</label><input type="file" id="c-photo" accept="image/*"></div>
+        <div class="form-group"><label>About You</label><textarea id="c-bio" placeholder="Describe yourself..."></textarea></div>
+        <button class="submit-btn" onclick="submitCompanion()">Post Companion Profile</button>
+        <div class="success-msg" id="c-success">✅ Profile submitted! We'll review and publish it soon.</div>
+      </div>
+
+      <!-- Event Form -->
+      <div class="form-card">
+        <h3>🎉 Post an Event</h3>
+        <p>Share your Nepal event with tourists and locals</p>
+        <div class="form-group"><label>Event Title</label><input type="text" id="e-title" placeholder="Event name"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="e-cat">
+            <option value="">Select category</option>
+            <option>Cultural</option><option>Trekking</option><option>Music</option>
+            <option>Food</option><option>Religious</option><option>Sports</option><option>Entertainment</option>
+          </select>
+        </div>
+        <div class="form-group"><label>City</label>
+          <select id="e-city">
+            <option value="">Select city</option>
+            <option>Kathmandu</option><option>Pokhara</option><option>Chitwan</option>
+            <option>Lumbini</option><option>Everest Region</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Location / Venue</label><input type="text" id="e-loc" placeholder="Venue name and address"></div>
+        <div class="form-group"><label>Event Date</label><input type="date" id="e-date"></div>
+        <div class="form-group"><label>Start Time</label><input type="time" id="e-time"></div>
+        <div class="form-group"><label>Organizer Name</label><input type="text" id="e-org" placeholder="Your name or organization"></div>
+        <div class="form-group"><label>Contact Phone</label><input type="text" id="e-phone" placeholder="+977 98XXXXXXXX"></div>
+        <div class="form-group"><label>Description</label><textarea id="e-desc" placeholder="Describe your event..."></textarea></div>
+        <button class="submit-btn" onclick="submitEvent()">Post Event</button>
+        <div class="success-msg" id="e-success">✅ Event submitted! We'll review and publish it soon.</div>
+      </div>
+
+      <!-- Worker Form -->
+      <div class="form-card">
+        <h3>💼 Register as Worker</h3>
+        <p>Post your profile and get hired for jobs and gigs</p>
+        <div class="form-group"><label>Full Name</label><input type="text" id="w-name" placeholder="Your name"></div>
+        <div class="form-group"><label>City</label>
+          <select id="w-city">
+            <option value="">Select city</option>
+            <option>Kathmandu</option><option>Pokhara</option><option>Chitwan</option>
+            <option>Butwal</option><option>Biratnagar</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Your Skills</label><input type="text" id="w-skills" placeholder="e.g. Cooking, Driving, Cleaning, Teaching"></div>
+        <div class="form-group"><label>Experience</label><input type="text" id="w-exp" placeholder="e.g. 2 years cooking experience"></div>
+        <div class="form-group"><label>Price per Day (रू)</label><input type="number" id="w-price" placeholder="e.g. 1000"></div>
+        <div class="form-group"><label>Availability</label><input type="text" id="w-avail" placeholder="e.g. Weekdays, Full time, Part time"></div>
+        <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="w-phone" placeholder="+977 98XXXXXXXX"></div>
+        <div class="form-group"><label>Your Photo</label><input type="file" id="w-photo" accept="image/*"></div>
+        <div class="form-group"><label>Upload CV (PDF)</label><input type="file" id="w-cv" accept=".pdf"></div>
+        <div class="form-group"><label>About You</label><textarea id="w-bio" placeholder="Describe your skills and experience..."></textarea></div>
+        <button class="submit-btn" onclick="submitWorker()">Post Worker Profile</button>
+        <div class="success-msg" id="w-success">✅ Profile submitted! We'll review and publish it soon.</div>
+      </div>
+
+      <!-- Rental Form -->
+      <div class="form-card">
+        <h3>📦 Post a Rental</h3>
+        <p>Rent out your products and earn money</p>
+        <div class="form-group"><label>Item Title</label><input type="text" id="r-title" placeholder="What are you renting?"></div>
+        <div class="form-group"><label>Category</label>
+          <select id="r-cat">
+            <option value="">Select category</option>
+            <option>Bikes & Scooters</option><option>Cars & Vehicles</option>
+            <option>Camping Gear</option><option>Cameras & Equipment</option>
+            <option>Musical Instruments</option><option>Clothes & Costumes</option>
+            <option>Boats</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>City</label>
+          <select id="r-city">
+            <option value="">Select city</option>
+            <option>Kathmandu</option><option>Pokhara</option><option>Chitwan</option>
+            <option>Butwal</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Price per Day (रू)</label><input type="number" id="r-price" placeholder="e.g. 800"></div>
+        <div class="form-group"><label>Condition</label>
+          <select id="r-condition">
+            <option value="">Select condition</option>
+            <option>Excellent</option><option>Good</option><option>Fair</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Owner Name</label><input type="text" id="r-owner" placeholder="Your name"></div>
+        <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="r-phone" placeholder="+977 98XXXXXXXX"></div>
+        <div class="form-group"><label>Item Photo</label><input type="file" id="r-photo" accept="image/*"></div>
+        <div class="form-group"><label>Description</label><textarea id="r-desc" placeholder="Describe the item, availability, terms..."></textarea></div>
+        <button class="submit-btn" onclick="submitRental()">Post Rental</button>
+        <div class="success-msg" id="r-success">✅ Rental posted! We'll review and publish it soon.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Rent<span>Anythings</span></div>
+  <p class="footer-tagline">Nepal's platform for guides, companions, workers, events & rentals</p>
+  <div class="footer-links">
+    <a href="#guides">Guides</a>
+    <a href="#companions">Companions</a>
+    <a href="#events">Events</a>
+    <a href="#workers">Workers</a>
+    <a href="#rentals">Rentals</a>
+    <a href="#post">Post Free</a>
+  </div>
+  <p class="footer-copy">© 2026 RentAnythings Nepal · All services are professional & verified</p>
+</footer>
+
+<script>
+  // Supabase setup
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://dhsniqaevpkmdborlxmx.supabase.co',
+    'sb_publishable_Pk_Ff2LCOEp1RQmxwMg5Vg_f-EzzaZQ'
+  );
+
+
+  // Upload photo to Supabase Storage
+  async function uploadPhoto(file, folder) {
+    if (!file) return null;
+    const fileName = folder + '/' + Date.now() + '_' + file.name;
+    const { data, error } = await sb.storage.from('photos').upload(fileName, file);
+    if (error) { console.error('Upload error:', error); return null; }
+    const { data: urlData } = sb.storage.from('photos').getPublicUrl(fileName);
+    return urlData.publicUrl;
+  }
+
+  // Weather data for Nepal cities
+  const weatherData = [
+    { city: 'Kathmandu', icon: '⛅', temp: '24°C', desc: 'Partly Cloudy' },
+    { city: 'Pokhara', icon: '🌤️', temp: '26°C', desc: 'Mostly Sunny' },
+    { city: 'Chitwan', icon: '☀️', temp: '31°C', desc: 'Hot & Sunny' },
+    { city: 'Everest', icon: '🌨️', temp: '-5°C', desc: 'Snowy' },
+    { city: 'Lumbini', icon: '🌞', temp: '33°C', desc: 'Very Hot' },
+    { city: 'Namche', icon: '🌬️', temp: '8°C', desc: 'Windy & Cold' },
+  ];
+
+  function loadWeather() {
+    const grid = document.getElementById('weatherGrid');
+    grid.innerHTML = weatherData.map(w => `
+      <div class="weather-card">
+        <div class="weather-icon">${w.icon}</div>
+        <div class="weather-city">${w.city}</div>
+        <div class="weather-temp">${w.temp}</div>
+        <div class="weather-desc">${w.desc}</div>
+      </div>
+    `).join('');
+  }
+
+  // Load guides
+  async function loadGuides() {
+    const { data, error } = await sb.from('guides').select('*').eq('status','approved').limit(6);
+    const grid = document.getElementById('guidesGrid');
+    if (!data || data.length === 0) {
+      grid.innerHTML = `<div class="loading">No guides yet. <a href="#post" style="color:var(--gold)">Be the first to post!</a></div>`;
+      return;
+    }
+    grid.innerHTML = data.map(g => `
+      <div class="card">
+        ${g.Photo_url ? `<img src="${g.Photo_url}" style="width:100%;height:180px;object-fit:cover;">` : `<div class="card-img">🧭</div>`}
+        <div class="card-body">
+          <div class="card-name">${g.Name}</div>
+          <div class="card-meta">📍 ${g.City} · ${g.Years_of_experience} yrs exp</div>
+          ${g.license_verified ? '<div class="verified">✅ License Verified</div>' : ''}
+          <div class="card-tags">
+            ${g.Langauge ? g.Langauge.split(',').map(l => `<span class="tag">${l.trim()}</span>`).join('') : ''}
+          </div>
+          <div class="card-price">रू ${g.Price_per_day?.toLocaleString()}/day</div>
+          <a class="card-btn" href="https://wa.me/${g.Phone?.replace(/\D/g,'')}?text=Hi! I found your guide profile on RentAnythings Nepal. I'd like to hire you." target="_blank">📱 Contact on WhatsApp</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Load companions
+  async function loadCompanions() {
+    const { data } = await sb.from('companions').select('*').eq('status','approved').limit(6);
+    const grid = document.getElementById('companionsGrid');
+    if (!data || data.length === 0) {
+      grid.innerHTML = `<div class="loading">No companions yet. <a href="#post" style="color:var(--gold)">Be the first to post!</a></div>`;
+      return;
+    }
+    grid.innerHTML = data.map(c => `
+      <div class="card">
+        ${c.Photo_url ? `<img src="${c.Photo_url}" style="width:100%;height:180px;object-fit:cover;">` : `<div class="card-img">👤</div>`}
+        <div class="card-body">
+          <div class="card-name">${c.Name}</div>
+          <div class="card-meta">📍 ${c.City} · Age ${c.Age}</div>
+          <div class="card-tags">
+            ${c.Service ? c.Service.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('') : ''}
+          </div>
+          <div class="card-price">रू ${c.Price_per_hours?.toLocaleString()}/hr</div>
+          <a class="card-btn" href="https://wa.me/${c.Phone?.replace(/\D/g,'')}?text=Hi! I found your companion profile on RentAnythings Nepal." target="_blank">📱 Contact on WhatsApp</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Load events
+  async function loadEvents() {
+    const { data } = await sb.from('events').select('*').eq('status','approved').order('event_date').limit(6);
+    const grid = document.getElementById('eventsGrid');
+    if (!data || data.length === 0) {
+      grid.innerHTML = `<div class="loading">No events yet. <a href="#post" style="color:var(--gold)">Post your event!</a></div>`;
+      return;
+    }
+    grid.innerHTML = data.map(e => {
+      const d = e.event_date ? new Date(e.event_date) : null;
+      return `
+        <div class="event-card">
+          <div class="event-date-box">
+            <div class="event-day">${d ? d.getDate() : '?'}</div>
+            <div class="event-month">${d ? d.toLocaleString('default',{month:'short'}) : ''}</div>
+          </div>
+          <div class="event-info">
+            <div class="event-title">${e.Title}</div>
+            <div class="event-location">📍 ${e.Location}, ${e.City} ${e.start_time ? '· ⏰ ' + e.start_time : ''}</div>
+            <div class="event-category">${e['types of event'] || 'Event'}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Load workers
+  async function loadWorkers() {
+    const { data } = await sb.from('workers').select('*').eq('status','approved').limit(6);
+    const grid = document.getElementById('workersGrid');
+    if (!data || data.length === 0) {
+      grid.innerHTML = `<div class="loading">No workers yet. <a href="#post" style="color:var(--gold)">Post your profile!</a></div>`;
+      return;
+    }
+    grid.innerHTML = data.map(w => `
+      <div class="card">
+        ${w.Photo_url ? `<img src="${w.Photo_url}" style="width:100%;height:180px;object-fit:cover;">` : `<div class="card-img">💼</div>`}
+        <div class="card-body">
+          <div class="card-name">${w.Name}</div>
+          <div class="card-meta">📍 ${w.City} · ${w.availability || 'Available'}</div>
+          <div class="card-tags">
+            ${w.skills ? w.skills.split(',').map(s => `<span class="tag">${s.trim()}</span>`).join('') : ''}
+          </div>
+          <div class="card-price">रू ${w.Price_per_day?.toLocaleString()}/day</div>
+          <a class="card-btn gold" href="https://wa.me/${w.Phone?.replace(/\D/g,'')}?text=Hi! I found your worker profile on RentAnythings Nepal. I'd like to hire you." target="_blank">📱 Contact on WhatsApp</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Load rentals
+  async function loadRentals() {
+    const { data } = await sb.from('rentals').select('*').eq('status','approved').limit(6);
+    const grid = document.getElementById('rentalsGrid');
+    if (!data || data.length === 0) {
+      grid.innerHTML = `<div class="loading">No rentals yet. <a href="#post" style="color:var(--gold)">Post your rental!</a></div>`;
+      return;
+    }
+    grid.innerHTML = data.map(r => `
+      <div class="card">
+        ${r.Photo_url ? `<img src="${r.Photo_url}" style="width:100%;height:180px;object-fit:cover;">` : `<div class="card-img">📦</div>`}
+        <div class="card-body">
+          <div class="card-name">${r.Title}</div>
+          <div class="card-meta">📍 ${r.City} · ${r.conditions || ''} condition</div>
+          <div class="card-tags"><span class="tag">${r.category || ''}</span></div>
+          <div class="card-price">रू ${r.Price_per_day?.toLocaleString()}/day</div>
+          <a class="card-btn blue" href="https://wa.me/${r.Phone?.replace(/\D/g,'')}?text=Hi! I found your rental on RentAnythings Nepal. I'd like to rent ${r.Title}." target="_blank">📱 Contact on WhatsApp</a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Submit functions
+  async function submitGuide() {
+    const photoFile = document.getElementById('g-photo').files[0];
+    const licenseFile = document.getElementById('g-license-photo').files[0];
+    const photoUrl = await uploadPhoto(photoFile, 'guides');
+    const licensePhotoUrl = await uploadPhoto(licenseFile, 'licenses');
+    const data = {
+      Name: document.getElementById('g-name').value,
+      City: document.getElementById('g-city').value,
+      Langauge: document.getElementById('g-lang').value,
+      Years_of_experience: parseInt(document.getElementById('g-exp').value),
+      Price_per_day: parseInt(document.getElementById('g-price').value),
+      'license number': document.getElementById('g-license').value,
+      Phone: document.getElementById('g-phone').value,
+      Bio: document.getElementById('g-bio').value,
+      Photo_url: photoUrl,
+      license_photo_url: licensePhotoUrl,
+      license_verified: false
+    };
+    const { error } = await sb.from('guides').insert([data]);
+    if (!error) { document.getElementById('g-success').style.display = 'block'; loadGuides(); }
+    else { alert('Error: ' + error.message); }
+  }
+
+  async function submitCompanion() {
+    console.log("submitting companion...");
+    const photoFile = document.getElementById('c-photo').files[0];
+    const photoUrl = await uploadPhoto(photoFile, 'companions');
+    const data = {
+      Name: document.getElementById('c-name').value,
+      Age: parseInt(document.getElementById('c-age').value),
+      City: document.getElementById('c-city').value,
+      Service: document.getElementById('c-services').value,
+      Langauge: document.getElementById('c-lang').value,
+      Price_per_hours: parseInt(document.getElementById('c-price').value),
+      Phone: document.getElementById('c-phone').value,
+      Bio: document.getElementById('c-bio').value,
+      Photo_url: photoUrl,
+    };
+    const { error, data: result } = await sb.from('companions').insert([data]);
+    if (!error) { document.getElementById('c-success').style.display = 'block'; loadCompanions(); }
+    else { alert('Error: ' + error.message); }
+  }
+
+  async function submitEvent() {
+    const data = {
+      Title: document.getElementById('e-title').value,
+      'types of event': document.getElementById('e-cat').value,
+      City: document.getElementById('e-city').value,
+      Location: document.getElementById('e-loc').value,
+      event_date: document.getElementById('e-date').value,
+      start_time: document.getElementById('e-time').value,
+      organizer_name: document.getElementById('e-org').value,
+      organizer_phone: document.getElementById('e-phone').value,
+      Description: document.getElementById('e-desc').value,
+    };
+    const { error, data: result } = await sb.from('events').insert([data]);
+    if (!error) { document.getElementById('e-success').style.display = 'block'; loadEvents(); }
+    else { alert('Error: ' + error.message); }
+  }
+
+  async function submitWorker() {
+    const photoFile = document.getElementById('w-photo').files[0];
+    const cvFile = document.getElementById('w-cv').files[0];
+    const photoUrl = await uploadPhoto(photoFile, 'workers');
+    const cvUrl = await uploadPhoto(cvFile, 'cvs');
+    const data = {
+      Name: document.getElementById('w-name').value,
+      City: document.getElementById('w-city').value,
+      skills: document.getElementById('w-skills').value,
+      experience: document.getElementById('w-exp').value,
+      Price_per_day: parseInt(document.getElementById('w-price').value),
+      availability: document.getElementById('w-avail').value,
+      Phone: document.getElementById('w-phone').value,
+      Bio: document.getElementById('w-bio').value,
+      Photo_url: photoUrl,
+      cv_url: cvUrl,
+    };
+    const { error } = await sb.from('workers').insert([data]);
+    if (!error) { document.getElementById('w-success').style.display = 'block'; loadWorkers(); }
+    else { alert('Error: ' + error.message); }
+  }
+
+  async function submitRental() {
+    const photoFile = document.getElementById('r-photo').files[0];
+    const photoUrl = await uploadPhoto(photoFile, 'rentals');
+    const data = {
+      Title: document.getElementById('r-title').value,
+      category: document.getElementById('r-cat').value,
+      City: document.getElementById('r-city').value,
+      Price_per_day: parseInt(document.getElementById('r-price').value),
+      conditions: document.getElementById('r-condition').value,
+      owner_name: document.getElementById('r-owner').value,
+      Phone: document.getElementById('r-phone').value,
+      Description: document.getElementById('r-desc').value,
+      Photo_url: photoUrl,
+    };
+    const { error } = await sb.from('rentals').insert([data]);
+    if (!error) { document.getElementById('r-success').style.display = 'block'; loadRentals(); }
+    else { alert('Error: ' + error.message); }
+  }
+
+  // Init
+  loadWeather();
+  loadGuides();
+  loadCompanions();
+  loadEvents();
+  loadWorkers();
+  loadRentals();
+</script>
+</body>
+</html>
